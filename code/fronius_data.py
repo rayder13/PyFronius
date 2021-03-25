@@ -19,7 +19,7 @@ inverterMtrEndPt = "/solar_api/v1/GetMeterRealtimeData.cgi?Scope=Device&DeviceId
 inverterPfEndPt = "/solar_api/v1/GetPowerFlowRealtimeData.fcgi"
 
 # Options
-requestInterval = 10 # Should be 60 seconds for remotely accurate readings
+requestInterval = 60 # Should be 60 seconds for remotely accurate readings
 
 energyUsedHrAvg = 0
 energyUsedHrRunning = 0
@@ -54,7 +54,7 @@ while True:
 
         if jsonPfData['Body']['Data']['Site']['P_Load'] >= 0 :
             print('Feeding in ' + str(froniusPLoad) + 'w to the grid')
-            if energyUsedHrCount <= 600 :
+            if energyUsedHrCount <= 60 :
                 energyUsedHrCount += 1
                 energyUsedHrRunning += int(froniusPLoad)
                 energyUsedHrAvg = energyUsedHrRunning / energyUsedHrCount
@@ -69,21 +69,20 @@ while True:
 
         elif jsonPfData['Body']['Data']['Site']['P_Load'] < 0 :
             print('Drawing ' + str(froniusPLoad * -1) + 'w from the grid')
-            if energyUsedHrCount <= 600 :
+            if energyUsedHrCount <= 60 :
                 energyUsedHrCount += 1
                 energyUsedHrRunning += int(froniusPLoad * -1)
-                energyUsedHrAvg += energyUsedHrRunning / ((energyUsedHrCount * requestInterval) * 60)
+                energyUsedHrAvg = energyUsedHrRunning / 60
             else :
                 energyUsedHrCount = 1
                 energyUsedHrRunning = 0
                 energyUsedHrAvg = 0
 
-            print('kWh average for the current hour: ' + str(energyUsedHrAvg))
+            print('Wh average for the current hour: ' + str(energyUsedHrAvg))
 
             time.sleep(requestInterval)
     
     except KeyboardInterrupt :
-        print('PyFronius exiting')
+        print('Ctrl-C Interrupt detected')
         sys.exit()
-
-
+        
